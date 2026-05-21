@@ -2,100 +2,76 @@
 import { useState } from "react"
 import { Check, CreditCard, FileText, AlertTriangle, ChevronRight, Shield, Zap } from "lucide-react"
 
-// ─── DADOS ─────────────────────────────────────────────────────
 const PLANS = [
-  {
-    id:"STARTER", name:"Starter", price:97, color:"#6b7280",
-    features:["1 barbeiro","Link de agendamento","Estoque básico","Histórico de clientes"],
-  },
-  {
-    id:"PRO", name:"Pro", price:197, color:"#3b82f6",
-    features:["Até 3 barbeiros","Order Bump no checkout","Lembretes automáticos WhatsApp","DRE e relatório financeiro","Comissões por barbeiro"],
-  },
-  {
-    id:"ELITE", name:"Elite", price:297, color:"#8b5cf6",
-    features:["Barbeiros ilimitados","Tudo do plano Pro","Relatórios avançados exportáveis","Integração PIX + Stripe","Gerente de conta dedicado"],
-  },
+  { id:"STARTER", name:"Starter", price:97,  color:"#6b7280",
+    features:["1 barbeiro","Link de agendamento","Estoque básico","Histórico de clientes"] },
+  { id:"PRO",     name:"Pro",     price:197, color:"#3b82f6",
+    features:["Até 3 barbeiros","Order Bump no checkout","Lembretes automáticos WhatsApp","DRE e relatório financeiro","Comissões por barbeiro"] },
+  { id:"ELITE",   name:"Elite",   price:297, color:"#8b5cf6",
+    features:["Barbeiros ilimitados","Tudo do plano Pro","Relatórios avançados exportáveis","Integração PIX + Stripe","Gerente de conta dedicado"] },
 ]
 
 const INVOICES = [
-  {date:"01/05/2026", desc:"Plano Pro — Maio 2026",  amount:197, status:"paid"},
-  {date:"01/04/2026", desc:"Plano Pro — Abril 2026", amount:197, status:"paid"},
-  {date:"01/03/2026", desc:"Plano Pro — Março 2026", amount:197, status:"paid"},
+  {date:"01/05/2026",desc:"Plano Pro — Maio 2026",  amount:197,status:"paid"},
+  {date:"01/04/2026",desc:"Plano Pro — Abril 2026", amount:197,status:"paid"},
+  {date:"01/03/2026",desc:"Plano Pro — Março 2026", amount:197,status:"paid"},
 ]
 
-// ─── COMPONENTE PRINCIPAL ──────────────────────────────────────
-export default function BillingPage() {
+export default function Billing() {
   const [planId,      setPlanId]      = useState("PRO")
   const [showUpgrade, setShowUpgrade] = useState(false)
-  const [showCancel,  setShowCancel]  = useState(false)
   const [upgraded,    setUpgraded]    = useState(false)
+  const [showCancel,  setShowCancel]  = useState(false)
   const [cancelled,   setCancelled]   = useState(false)
 
-  const plan        = PLANS.find(p=>p.id===planId)
-  const nextPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)>PLANS.indexOf(plan!))
-  const prevPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)<PLANS.indexOf(plan!))
+  const plan       = PLANS.find(p=>p.id===planId)!
+  const planIndex  = PLANS.findIndex(p=>p.id===planId)
+  const nextPlans  = PLANS.filter((_,i)=>i>planIndex)
+  const prevPlans  = PLANS.filter((_,i)=>i<planIndex)
   const nextBilling = "01/06/2026"
 
-  const handleUpgrade = (newPlanId) => {
-    setPlanId(newPlanId)
-    setUpgraded(true)
-    setShowUpgrade(false)
-    setTimeout(()=>setUpgraded(false), 3500)
+  const handleUpgrade = (newId: string) => {
+    setPlanId(newId); setUpgraded(true); setShowUpgrade(false)
+    setTimeout(()=>setUpgraded(false),3500)
   }
 
   return (
     <div style={{fontFamily:"var(--font-sans,system-ui)",color:"var(--color-text-primary)",maxWidth:580,margin:"0 auto",paddingBottom:40}}>
-
-      {/* Header */}
       <div style={{padding:"16px 16px 0"}}>
         <div style={{fontSize:11,color:"var(--color-text-tertiary)",textTransform:"uppercase",letterSpacing:".06em"}}>BarberClick Admin</div>
         <div style={{fontSize:18,fontWeight:500}}>Assinatura e cobrança</div>
       </div>
-
       <div style={{padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
 
         {/* Plano atual */}
-        <div style={{
-          background:"var(--color-background-primary)",
-          border:`1.5px solid ${plan?.color}50`,
-          borderRadius:14, padding:"18px",
-        }}>
+        <div style={{background:"var(--color-background-primary)",border:`1.5px solid ${plan.color}50`,borderRadius:14,padding:"18px"}}>
           <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:16}}>
-            <div style={{width:48,height:48,borderRadius:12,background:plan?.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <Shield size={22} color={plan?.color}/>
+            <div style={{width:48,height:48,borderRadius:12,background:plan.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <Shield size={22} color={plan.color}/>
             </div>
             <div style={{flex:1}}>
               <div style={{fontSize:11,color:"var(--color-text-tertiary)",textTransform:"uppercase",letterSpacing:".04em",marginBottom:3}}>Plano atual</div>
               <div style={{display:"flex",alignItems:"baseline",gap:8}}>
-                <span style={{fontSize:22,fontWeight:500}}>{plan?.name}</span>
-                <span style={{fontSize:14,color:"var(--color-text-secondary)"}}>R$ {plan?.price}/mês</span>
+                <span style={{fontSize:22,fontWeight:500}}>{plan.name}</span>
+                <span style={{fontSize:14,color:"var(--color-text-secondary)"}}>R$ {plan.price}/mês</span>
               </div>
             </div>
-            <div style={{fontSize:10,background:plan?.color+"18",color:plan?.color,padding:"4px 10px",borderRadius:20,fontWeight:500,flexShrink:0}}>
-              Ativo
-            </div>
+            <div style={{fontSize:10,background:plan.color+"18",color:plan.color,padding:"4px 10px",borderRadius:20,fontWeight:500,flexShrink:0}}>Ativo</div>
           </div>
-
-          {/* Features */}
           <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:16}}>
-            {plan?.features.map(f=>(
+            {plan.features.map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,color:"var(--color-text-secondary)"}}>
                 <Check size={12} color="#10b981"/>{f}
               </div>
             ))}
           </div>
-
-          {/* Próxima cobrança */}
           <div style={{background:"var(--color-background-secondary)",borderRadius:9,padding:"10px 14px",fontSize:13,display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
             <span style={{color:"var(--color-text-secondary)"}}>Próxima cobrança</span>
-            <span style={{fontWeight:500}}>{nextBilling} — R$ {plan?.price}.00</span>
+            <span style={{fontWeight:500}}>{nextBilling} — R$ {plan.price}.00</span>
           </div>
-
-          {/* Ações */}
           {upgraded ? (
             <div style={{background:"#d1fae5",borderRadius:9,padding:"11px 14px",fontSize:13,color:"#065f46",display:"flex",alignItems:"center",gap:6,fontWeight:500}}>
-              <Check size={14}/> Plano atualizado com sucesso! Sua conta já reflete o novo plano.
+              <Check size={14}/> Plano atualizado com sucesso!
             </div>
           ) : cancelled ? (
             <div style={{background:"var(--color-background-secondary)",borderRadius:9,padding:"11px 14px",fontSize:13,color:"var(--color-text-secondary)",textAlign:"center"}}>
@@ -103,21 +79,13 @@ export default function BillingPage() {
             </div>
           ) : (
             <div style={{display:"flex",gap:8}}>
-              {nextPlans.length>0 && (
-                <button onClick={()=>setShowUpgrade(true)} style={{
-                  flex:1,padding:"11px",borderRadius:9,border:"none",cursor:"pointer",
-                  background:"var(--color-text-primary)",color:"var(--color-background-primary)",
-                  fontSize:13,fontWeight:500,display:"flex",alignItems:"center",justifyContent:"center",gap:5,
-                }}>
-                  <Zap size={14}/> Fazer upgrade
+              {nextPlans.length>0&&(
+                <button onClick={()=>setShowUpgrade(true)} style={{flex:1,padding:"11px",borderRadius:9,border:"none",cursor:"pointer",background:"var(--color-text-primary)",color:"var(--color-background-primary)",fontSize:13,fontWeight:500,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                  <Zap size={14}/>Fazer upgrade
                 </button>
               )}
-              {prevPlans.length>0 && (
-                <button onClick={()=>setShowUpgrade(true)} style={{
-                  flex:1,padding:"11px",borderRadius:9,
-                  border:"0.5px solid var(--color-border-secondary)",cursor:"pointer",
-                  background:"transparent",color:"var(--color-text-secondary)",fontSize:13,
-                }}>
+              {prevPlans.length>0&&(
+                <button onClick={()=>setShowUpgrade(true)} style={{flex:1,padding:"11px",borderRadius:9,border:"0.5px solid var(--color-border-secondary)",cursor:"pointer",background:"transparent",color:"var(--color-text-secondary)",fontSize:13}}>
                   Fazer downgrade
                 </button>
               )}
@@ -125,18 +93,13 @@ export default function BillingPage() {
           )}
         </div>
 
-        {/* Seleção de plano (upgrade/downgrade) */}
-        {showUpgrade && (
+        {/* Seleção de plano */}
+        {showUpgrade&&(
           <div style={{background:"var(--color-background-primary)",border:"2px solid var(--color-text-primary)",borderRadius:14,padding:"16px"}}>
-            <div style={{fontSize:14,fontWeight:500,marginBottom:4}}>Mudar de plano</div>
-            <div style={{fontSize:12,color:"var(--color-text-secondary)",marginBottom:14}}>As mudanças entram em vigor imediatamente.</div>
+            <div style={{fontSize:14,fontWeight:500,marginBottom:14}}>Mudar de plano</div>
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {PLANS.filter(p=>p.id!==planId).map(p=>(
-                <div key={p.id} onClick={()=>handleUpgrade(p.id)} style={{
-                  display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:10,
-                  border:`0.5px solid ${p.color}40`,cursor:"pointer",
-                  background:p.id===planId?"var(--color-background-secondary)":"var(--color-background-primary)",
-                }}>
+                <div key={p.id} onClick={()=>handleUpgrade(p.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:10,border:`0.5px solid ${p.color}40`,cursor:"pointer",background:"var(--color-background-primary)"}}>
                   <div style={{width:32,height:32,borderRadius:8,background:p.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     <Shield size={16} color={p.color}/>
                   </div>
@@ -170,7 +133,7 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* Histórico de faturas */}
+        {/* Faturas */}
         <div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:12,padding:"16px"}}>
           <div style={{fontSize:13,fontWeight:500,marginBottom:12}}>Faturas</div>
           {INVOICES.map((inv,i)=>(
@@ -184,33 +147,22 @@ export default function BillingPage() {
               </div>
               <div style={{textAlign:"right",flexShrink:0}}>
                 <div style={{fontSize:13,fontWeight:500}}>R$ {inv.amount}.00</div>
-                <div style={{fontSize:10,background:"#d1fae5",color:"#065f46",padding:"2px 7px",borderRadius:4,fontWeight:500,display:"inline-block",marginTop:2}}>
-                  Pago
-                </div>
+                <div style={{fontSize:10,background:"#d1fae5",color:"#065f46",padding:"2px 7px",borderRadius:4,fontWeight:500,display:"inline-block",marginTop:2}}>Pago</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Cancelamento */}
-        {!cancelled && (
-          <div style={{
-            background:"var(--color-background-danger)",
-            border:"0.5px solid var(--color-border-danger)",
-            borderRadius:12, padding:"14px",
-          }}>
+        {!cancelled&&(
+          <div style={{background:"var(--color-background-danger)",border:"0.5px solid var(--color-border-danger)",borderRadius:12,padding:"14px"}}>
             {!showCancel ? (
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:500,color:"var(--color-text-danger)"}}>Cancelar assinatura</div>
-                  <div style={{fontSize:12,color:"var(--color-text-danger)",opacity:.85,marginTop:2}}>
-                    Você perderá o acesso ao painel ao final do período atual
-                  </div>
+                  <div style={{fontSize:12,color:"var(--color-text-danger)",opacity:.85,marginTop:2}}>Você perderá o acesso ao painel ao final do período</div>
                 </div>
-                <button onClick={()=>setShowCancel(true)} style={{
-                  fontSize:12,border:"0.5px solid var(--color-border-danger)",borderRadius:6,
-                  padding:"6px 12px",background:"transparent",color:"var(--color-text-danger)",cursor:"pointer",flexShrink:0,
-                }}>
+                <button onClick={()=>setShowCancel(true)} style={{fontSize:12,border:"0.5px solid var(--color-border-danger)",borderRadius:6,padding:"6px 12px",background:"transparent",color:"var(--color-text-danger)",cursor:"pointer",flexShrink:0}}>
                   Cancelar
                 </button>
               </div>
@@ -218,31 +170,23 @@ export default function BillingPage() {
               <div>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
                   <AlertTriangle size={16} style={{color:"var(--color-text-danger)",flexShrink:0}}/>
-                  <div style={{fontSize:13,fontWeight:500,color:"var(--color-text-danger)"}}>Tem certeza que quer cancelar?</div>
+                  <div style={{fontSize:13,fontWeight:500,color:"var(--color-text-danger)"}}>Tem certeza?</div>
                 </div>
                 <div style={{fontSize:12,color:"var(--color-text-danger)",opacity:.9,marginBottom:14,lineHeight:1.6}}>
-                  Você terá acesso até <strong>{nextBilling}</strong>. Após essa data, sua barbearia ficará desativada
-                  e seus clientes não poderão agendar. Todos os dados são preservados por 90 dias.
+                  Você terá acesso até <strong>{nextBilling}</strong>. Após essa data sua barbearia ficará desativada.
                 </div>
                 <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>setShowCancel(false)} style={{
-                    flex:1,padding:"10px",borderRadius:8,border:"none",cursor:"pointer",
-                    background:"var(--color-text-primary)",color:"var(--color-background-primary)",fontSize:13,fontWeight:500,
-                  }}>
-                    Manter minha assinatura
+                  <button onClick={()=>setShowCancel(false)} style={{flex:1,padding:"10px",borderRadius:8,border:"none",cursor:"pointer",background:"var(--color-text-primary)",color:"var(--color-background-primary)",fontSize:13,fontWeight:500}}>
+                    Manter assinatura
                   </button>
-                  <button onClick={()=>{setCancelled(true);setShowCancel(false)}} style={{
-                    padding:"10px 16px",borderRadius:8,border:"0.5px solid var(--color-border-danger)",
-                    background:"transparent",color:"var(--color-text-danger)",fontSize:13,cursor:"pointer",
-                  }}>
-                    Confirmar cancelamento
+                  <button onClick={()=>{setCancelled(true);setShowCancel(false)}} style={{padding:"10px 16px",borderRadius:8,border:"0.5px solid var(--color-border-danger)",background:"transparent",color:"var(--color-text-danger)",fontSize:13,cursor:"pointer"}}>
+                    Confirmar
                   </button>
                 </div>
               </div>
             )}
           </div>
         )}
-
       </div>
     </div>
   )
