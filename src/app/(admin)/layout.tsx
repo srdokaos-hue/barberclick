@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div style={{ display:"flex", minHeight:"100vh", background:"var(--bg)" }}>
       <Sidebar/>
-      <main style={{ flex:1, overflow:"auto", background:"var(--bg)" }}>
+      <main style={{ flex:1, overflow:"auto", background:"var(--bg)", minWidth:0 }}>
         {children}
       </main>
     </div>
