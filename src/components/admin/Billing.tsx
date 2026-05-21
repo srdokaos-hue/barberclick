@@ -33,8 +33,8 @@ export default function BillingPage() {
   const [cancelled,   setCancelled]   = useState(false)
 
   const plan        = PLANS.find(p=>p.id===planId)
-  const nextPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)>PLANS.indexOf(plan))
-  const prevPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)<PLANS.indexOf(plan))
+  const nextPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)>PLANS.indexOf(plan!))
+  const prevPlans   = PLANS.filter(p=>p.id!==planId && PLANS.indexOf(p)<PLANS.indexOf(plan!))
   const nextBilling = "01/06/2026"
 
   const handleUpgrade = (newPlanId) => {
