@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════
+   MODO CLARO (padrão)
+══════════════════════════════════════════════════════════ */
+:root {
+  /* Nossas variáveis */
+  --bg:        #f9fafb;
+  --bg-card:   #ffffff;
+  --bg-input:  #ffffff;
+  --bg-hover:  #f3f4f6;
+  --border:    #e5e7eb;
+  --border-2:  #d1d5db;
+  --text:      #111827;
+  --text-2:    #374151;
+  --text-3:    #6b7280;
+  --text-4:    #9ca3af;
+  --accent:    #111827;
+  --accent-fg: #ffffff;
+  --sidebar-bg:#111827;
+  --sidebar-fg:#ffffff;
+  --sidebar-muted: rgba(255,255,255,0.55);
+  --shadow:    0 1px 3px rgba(0,0,0,0.07);
+
+  /* Variáveis do design system (usadas pelos componentes copiados) */
+  --color-background-primary:   #ffffff;
+  --color-background-secondary: #f3f4f6;
+  --color-background-tertiary:  #e5e7eb;
+  --color-background-info:      #eff6ff;
+  --color-background-success:   #f0fdf4;
+  --color-background-warning:   #fffbeb;
+  --color-background-danger:    #fef2f2;
+
+  --color-text-primary:   #111827;
+  --color-text-secondary: #374151;
+  --color-text-tertiary:  #6b7280;
+  --color-text-info:      #1d4ed8;
+  --color-text-success:   #059669;
+  --color-text-warning:   #d97706;
+  --color-text-danger:    #dc2626;
+
+  --color-border-primary:   #111827;
+  --color-border-secondary: #d1d5db;
+  --color-border-tertiary:  #e5e7eb;
+  --color-border-info:      #bfdbfe;
+  --color-border-success:   #a7f3d0;
+  --color-border-warning:   #fcd34d;
+  --color-border-danger:    #fca5a5;
+
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", monospace;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODO ESCURO
+══════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* Nossas variáveis */
+  --bg:        #0f172a;
+  --bg-card:   #1e293b;
+  --bg-input:  #1e293b;
+  --bg-hover:  #334155;
+  --border:    #334155;
+  --border-2:  #475569;
+  --text:      #f1f5f9;
+  --text-2:    #cbd5e1;
+  --text-3:    #94a3b8;
+  --text-4:    #64748b;
+  --accent:    #f1f5f9;
+  --accent-fg: #0f172a;
+  --sidebar-bg:#020617;
+  --sidebar-fg:#f1f5f9;
+  --sidebar-muted: rgba(241,245,249,0.5);
+  --shadow:    0 1px 3px rgba(0,0,0,0.3);
+
+  /* Variáveis do design system — dark mode */
+  --color-background-primary:   #1e293b;
+  --color-background-secondary: #334155;
+  --color-background-tertiary:  #475569;
+  --color-background-info:      #1e3a5f;
+  --color-background-success:   #064e3b;
+  --color-background-warning:   #451a03;
+  --color-background-danger:    #450a0a;
+
+  --color-text-primary:   #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary:  #94a3b8;
+  --color-text-info:      #60a5fa;
+  --color-text-success:   #34d399;
+  --color-text-warning:   #fbbf24;
+  --color-text-danger:    #f87171;
+
+  --color-border-primary:   #f1f5f9;
+  --color-border-secondary: #475569;
+  --color-border-tertiary:  #334155;
+  --color-border-info:      #1e40af;
+  --color-border-success:   #065f46;
+  --color-border-warning:   #92400e;
+  --color-border-danger:    #7f1d1d;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { transition: background-color 0.2s; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Inputs */
+input, select, textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, background 0.2s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+input::placeholder, textarea::placeholder { color: var(--text-4); }
+select option { background: var(--bg-card); color: var(--text); }
+
+/* Botões */
+button {
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+button:hover:not(:disabled) { background: var(--bg-hover); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Range slider */
+input[type="range"] {
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--accent);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 10px; }
