@@ -59,7 +59,7 @@ export default async function PublicBookingPage({ params }: Props) {
         durationMin: s.durationMin,
         description: s.description ?? "",
       }))}
-      barbers={barbers}
+     barbers={barbers.map(b => ({ ...b, commissionPct: Number(b.commissionPct) }))}
       orderBumpProduct={barbershop.products[0] ? {
         id:             barbershop.products[0].id,
         name:           barbershop.products[0].name,
