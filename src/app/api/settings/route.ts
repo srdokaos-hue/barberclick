@@ -1,32 +1,28 @@
 import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error:"Não autorizado" }, { status:401 })
-  const barbershopId = (session.user as any).barbershopId
-
-  const [barbershop, config] = await Promise.all([
-    prisma.barbershop.findUnique({ where:{ id:barbershopId } }),
-    prisma.scheduleConfig.findUnique({ where:{ barbershopId } }),
-  ])
-  return NextResponse.json({ data:{ barbershop, config } })
+  if (!session?.user?.barbershopId) return NextResponse.json({ error:"Unauthorized" }, { status:401 })
+  const barbershop = await prisma.barbershop.findUnique({
+    where:   { id: session.user.barbershopId },
+    include: { scheduleConfig: true },
+  })
+  return NextResponse.json({ data: { barbershop } })
 }
 
-export async function PATCH(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error:"Não autorizado" }, { status:401 })
-  const barbershopId = (session.user as any).barbershopId
-
+  if (!session?.user?.barbershopId) return NextResponse.json({ error:"Unauthorized" }, { status:401 })
   const body = await req.json()
-  const { barbershop: shopData, config: configData } = body
-
-  await Promise.all([
-    shopData  ? prisma.barbershop.update({ where:{ id:barbershopId }, data:shopData }) : null,
-    configData? prisma.scheduleConfig.upsert({ where:{ barbershopId }, update:configData, create:{ barbershopId,...configData } }) : null,
-  ])
-
-  return NextResponse.json({ ok:true })
+  const data: Record<string,any> = {}
+  if (body.name     !== undefined) data.name     = body.name
+  if (body.slug     !== undefined) data.slug     = body.slug
+  if (body.whatsapp !== undefined) data.whatsapp = body.whatsapp
+  if (body.logoUrl  !== undefined) data.logoUrl  = body.logoUrl
+  if (body.address  !== undefined) data.address  = body.address
+  const updated = await prisma.barbershop.update({ where:{ id: session.user.barbershopId }, data })
+  return NextResponse.json({ data: { barbershop: updated } })
 }
