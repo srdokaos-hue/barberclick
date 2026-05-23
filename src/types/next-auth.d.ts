@@ -1,27 +1,9 @@
-import "next-auth"
-import "next-auth/jwt"
-
+import { DefaultSession } from "next-auth"
 declare module "next-auth" {
   interface Session {
     user: {
-      id:             string
-      name:           string
-      email:          string
-      image?:         string | null
-      role:           "ADMIN" | "BARBER"
-      barbershopId:   string
-      barbershopSlug: string
-      plan:           "STARTER" | "PRO" | "ELITE"
-    }
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id:             string
-    role:           string
-    barbershopId:   string
-    barbershopSlug: string
-    plan:           string
+      id: string; name: string; email: string
+      barbershopId: string; role: string; plan: string
+    } & DefaultSession["user"]
   }
 }
