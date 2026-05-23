@@ -2,6 +2,9 @@
 import { useState } from "react"
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { AlertTriangle, TrendingUp, DollarSign, Users, Package, Clock, ChevronDown, CheckCircle } from "lucide-react"
+import { useShopInfo } from "@/lib/useShopInfo"
+// dentro do componente:
+const { name: shopName } = useShopInfo()
 
 // ─── DADOS MOCK (determinísticos) ─────────────────────────────
 const rng = (seed, lo, hi) => lo + ((seed * 16807 + 1) % 2147483647) % (hi - lo)
@@ -98,7 +101,7 @@ export default function Dashboard() {
       {/* Cabeçalho */}
       <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, color: "var(--color-text-tertiary)", textTransform: "uppercase", letterSpacing: ".06em" }}>BarberClick Admin</div>
+          <div style={{ fontSize: 11, color: "var(--color-text-tertiary)", textTransform: "uppercase", letterSpacing: ".06em" }}>{shopName}</div>
           <div style={{ fontSize: 19, fontWeight: 500 }}>Dashboard</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
