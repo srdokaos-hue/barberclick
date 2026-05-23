@@ -10,18 +10,17 @@ export default function LoginPage() {
   const [loading,  setLoading]  = useState(false)
 
   async function handleLogin() {
-    if(!email||!password) { setError("Preencha todos os campos"); return }
-    setLoading(true); setError("")
-    const res = await signIn("credentials",{ email, password, redirect:false })
-    if(res?.error) { setError("E-mail ou senha incorretos"); setLoading(false); return }
-    // Detecta role e redireciona para o painel correto
+    if(!email||!password){setError("Preencha todos os campos");return}
+    setLoading(true);setError("")
+    const res = await signIn("credentials",{email,password,redirect:false})
+    if(res?.error){setError("E-mail ou senha incorretos");setLoading(false);return}
     const session = await getSession()
     const role = (session?.user as any)?.role
     window.location.href = role==="BARBER" ? "/barber/dashboard" : "/dashboard"
   }
 
-  return (
-    <div style={{minHeight:"100vh",background:"#0f172a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:16}}>
+  return(
+    <div style={{minHeight:"100vh",width:"100%",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{width:"100%",maxWidth:360}}>
         <div style={{textAlign:"center",marginBottom:32}}>
           <div style={{width:60,height:60,background:"white",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
