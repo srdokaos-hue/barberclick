@@ -1,220 +1,166 @@
 "use client"
-import { useState } from "react"
-import { Plus, Edit2, Check, X, Camera } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useState, useEffect } from "react"
+import { Plus, X, Check, Camera, Trash2, Target, ChevronDown, ChevronUp } from "lucide-react"
 
-const PALETTE = ["#3b82f6","#8b5cf6","#10b981","#f59e0b","#ef4444"]
-const BRL     = (v:number) => "R$ " + (+v).toLocaleString("pt-BR",{minimumFractionDigits:2})
-const EMPTY   = { name:"", email:"", phone:"", commission:50, role:"BARBER", avatarUrl:"" }
+const inp:React.CSSProperties={width:"100%",boxSizing:"border-box",background:"var(--color-background-secondary)",border:"1px solid var(--color-border-secondary)",color:"var(--color-text-primary)",fontSize:14,borderRadius:8,padding:"9px 12px"}
+const GOAL_TYPES=[{id:"cuts",label:"Cortes no mês"},{id:"revenue",label:"Faturamento"},{id:"commission",label:"Comissão"},{id:"custom",label:"Personalizado"}]
+interface Goal{id:string;name:string;target:number;type:string}
+interface Barber{id:string;name:string;email:string;role:string;commissionPct:number;avatarUrl?:string|null;active:boolean}
 
-const Field = ({label,children}:{label:string;children:React.ReactNode}) => (
-  <div style={{display:"flex",flexDirection:"column",gap:4}}>
-    <label style={{fontSize:12,color:"var(--text-3)"}}>{label}</label>
-    {children}
-  </div>
-)
-
-function AvatarPicker({value,onChange,name,color}:{value:string;onChange:(v:string)=>void;name:string;color:string}) {
-  const [editing, setEditing] = useState(false)
-  const [url, setUrl] = useState(value)
-  return (
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,marginBottom:14}}>
-      <div style={{position:"relative",cursor:"pointer"}} onClick={()=>setEditing(v=>!v)}>
-        {value ? (
-          <img src={value} alt={name} style={{width:72,height:72,borderRadius:"50%",objectFit:"cover",border:"3px solid var(--border)"}}
-            onError={e=>{(e.target as HTMLImageElement).style.display="none"}}/>
-        ) : (
-          <div style={{width:72,height:72,borderRadius:"50%",background:color+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,fontWeight:600,color,border:"3px solid var(--border)"}}>
-            {name[0]||"?"}
+function GoalEditor({barberId,onClose}:{barberId:string;onClose:()=>void}){
+  const [goals,setGoals]=useState<Goal[]>([])
+  const [saving,setSaving]=useState(false)
+  useEffect(()=>{
+    fetch(`/api/barbers/${barberId}/goals`).then(r=>r.json()).then(d=>setGoals(d.data??[]))
+  },[barberId])
+  const add=()=>{if(goals.length<3)setGoals(g=>[...g,{id:"g"+Date.now(),name:"Meta",target:0,type:"cuts"}])}
+  const remove=(id:string)=>setGoals(g=>g.filter(x=>x.id!==id))
+  const update=(id:string,f:string,v:any)=>setGoals(g=>g.map(x=>x.id===id?{...x,[f]:v}:x))
+  const save=async()=>{
+    setSaving(true)
+    await fetch(`/api/barbers/${barberId}/goals`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({goals})})
+    setSaving(false); onClose()
+  }
+  return(
+    <div style={{marginTop:12,background:"var(--color-background-secondary)",borderRadius:12,padding:14,border:"1px solid var(--color-border-secondary)"}}>
+      <div style={{fontSize:12,fontWeight:600,color:"var(--color-text-secondary)",marginBottom:12,display:"flex",alignItems:"center",gap:5}}><Target size={13}/>Metas (até 3)</div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {goals.map((g,i)=>(
+          <div key={g.id} style={{display:"flex",gap:6,alignItems:"center"}}>
+            <span style={{fontSize:11,color:"var(--color-text-tertiary)",fontWeight:600,minWidth:18}}>#{i+1}</span>
+            <select value={g.type} onChange={e=>update(g.id,"type",e.target.value)} style={{...inp,width:130,fontSize:12,padding:"7px 8px"}}>
+              {GOAL_TYPES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+            <input value={g.name} onChange={e=>update(g.id,"name",e.target.value)} placeholder="Nome" style={{...inp,flex:1,fontSize:12,padding:"7px 8px"}}/>
+            <input type="number" value={g.target} onChange={e=>update(g.id,"target",Number(e.target.value))} placeholder="Meta" style={{...inp,width:80,fontSize:12,padding:"7px 8px"}}/>
+            <button onClick={()=>remove(g.id)} style={{width:28,height:28,borderRadius:7,border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0,flexShrink:0}}><X size={12}/></button>
           </div>
-        )}
-        <div style={{position:"absolute",bottom:0,right:0,width:24,height:24,borderRadius:"50%",background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <Camera size={12} color="var(--accent-fg)"/>
-        </div>
+        ))}
+        {goals.length<3&&<button onClick={add} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 12px",borderRadius:8,border:"2px dashed var(--color-border-secondary)",background:"transparent",color:"var(--color-text-tertiary)",fontSize:12,cursor:"pointer"}}><Plus size={12}/>Adicionar meta</button>}
       </div>
-      {editing&&(
-        <div style={{display:"flex",gap:6,width:"100%"}}>
-          <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="Cole a URL da foto (https://...)" style={{flex:1,fontSize:12,padding:"7px 10px"}}/>
-          <button onClick={()=>{onChange(url);setEditing(false)}} style={{padding:"7px 12px",fontSize:12,background:"var(--accent)",color:"var(--accent-fg)",border:"none",borderRadius:7}}>OK</button>
-        </div>
-      )}
-      <div style={{fontSize:11,color:"var(--text-4)"}}>Clique para {value?"trocar":"adicionar"} foto</div>
-    </div>
-  )
-}
-
-function BarberForm({form,set,onSave,onCancel,canSave,title}:any) {
-  return (
-    <div style={{display:"flex",flexDirection:"column",gap:10}}>
-      <div style={{fontSize:14,fontWeight:600,marginBottom:4,color:"var(--text)"}}>{title}</div>
-      <AvatarPicker value={form.avatarUrl} onChange={v=>set("avatarUrl",v)} name={form.name||"?"} color="#3b82f6"/>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-        <Field label="Nome"><input value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Nome"/></Field>
-        <Field label="Função">
-          <select value={form.role} onChange={e=>set("role",e.target.value)}>
-            <option value="BARBER">Barbeiro</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </Field>
-      </div>
-      <Field label="E-mail"><input type="email" value={form.email} onChange={e=>set("email",e.target.value)} placeholder="email@barbearia.com"/></Field>
-      <Field label="WhatsApp"><input value={form.phone} onChange={e=>set("phone",e.target.value)} placeholder="(11) 99999-9999"/></Field>
-      <Field label={`Comissão — ${form.commission}% do faturamento`}>
-        <div>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text-4)",marginBottom:3}}>
-            <span>Barbearia {100-form.commission}%</span><span>Barbeiro {form.commission}%</span>
-          </div>
-          <input type="range" min={20} max={80} value={form.commission} onChange={e=>set("commission",Number(e.target.value))}/>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--text-4)",marginTop:1}}>
-            <span>20%</span><span>50%</span><span>80%</span>
-          </div>
-        </div>
-      </Field>
-      <div style={{display:"flex",gap:8,paddingTop:2}}>
-        <button onClick={onCancel} style={{padding:"9px 14px",fontSize:13,borderRadius:8,flexShrink:0}}>Cancelar</button>
-        <button onClick={onSave} disabled={!canSave} style={{
-          flex:1,padding:"10px",borderRadius:8,border:"none",
-          cursor:canSave?"pointer":"not-allowed",
-          background:canSave?"var(--accent)":"var(--bg-hover)",
-          color:canSave?"var(--accent-fg)":"var(--text-4)",
-          fontSize:13,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5,
-        }}>
-          <Check size={14}/>{title==="Novo barbeiro"?"Adicionar":"Salvar"}
+      <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:10}}>
+        <button onClick={onClose} style={{padding:"7px 12px",borderRadius:8,border:"1px solid var(--color-border-secondary)",background:"transparent",color:"var(--color-text-tertiary)",fontSize:12,cursor:"pointer"}}>Cancelar</button>
+        <button onClick={save} disabled={saving} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"var(--accent,#111)",color:"var(--accent-fg,#fff)",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+          {saving?"Salvando…":<><Check size={12}/>Salvar</>}
         </button>
       </div>
     </div>
   )
 }
 
-const INIT = [
-  {id:1,name:"Henrique",email:"henrique@barb.com",phone:"(11)98765-4321",role:"ADMIN", commission:70,active:true,appts:28,rev:4760,avatarUrl:""},
-  {id:2,name:"Igor",    email:"igor@barb.com",    phone:"(11)97654-3210",role:"BARBER",commission:50,active:true,appts:19,rev:3230,avatarUrl:""},
-]
+function BarberModal({barber,onClose}:{barber:Barber|null;onClose:()=>void}){
+  const qc=useQueryClient()
+  const isNew=!barber
+  const [name,    setName]    =useState(barber?.name??"")
+  const [email,   setEmail]   =useState(barber?.email??"")
+  const [password,setPassword]=useState("")
+  const [role,    setRole]    =useState(barber?.role??"BARBER")
+  const [pct,     setPct]     =useState(Number(barber?.commissionPct??50))
+  const [avatar,  setAvatar]  =useState(barber?.avatarUrl??"")
+  const [active,  setActive]  =useState(barber?.active??true)
+  const [saving,  setSaving]  =useState(false)
+  const [showGoals,setShowGoals]=useState(false)
 
-export default function TeamPanel() {
-  const [barbers,setBarbers] = useState<any[]>(INIT)
-  const [editing,setEditing] = useState<any>(null)
-  const [form,setForm]       = useState<any>({...EMPTY})
-
-  const set     = (k:string,v:any) => setForm((f:any)=>({...f,[k]:v}))
-  const canSave = form.name.trim().length>1 && form.email.includes("@")
-  const cancel  = () => { setEditing(null); setForm({...EMPTY}) }
-
-  const startEdit = (b:any) => { setEditing(b.id); setForm({name:b.name,email:b.email,phone:b.phone,commission:b.commission,role:b.role,avatarUrl:b.avatarUrl||""}) }
-
-  const save = () => {
-    if(editing==="new") setBarbers((prev:any[])=>[...prev,{id:Date.now(),...form,active:true,appts:0,rev:0}])
-    else setBarbers((prev:any[])=>prev.map((b:any)=>b.id===editing?{...b,...form}:b))
-    cancel()
+  const save=async()=>{
+    setSaving(true)
+    const body:any={name,email,role,commissionPct:pct,avatarUrl:avatar||null,active}
+    if(password) body.password=password
+    const url=barber?`/api/barbers/${barber.id}`:"/api/barbers"
+    await fetch(url,{method:barber?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    qc.invalidateQueries({queryKey:["team"]}); setSaving(false); onClose()
   }
 
-  const toggle = (id:number) => setBarbers((prev:any[])=>prev.map((b:any)=>b.id===id?{...b,active:!b.active}:b))
+  const del=async()=>{
+    if(!barber||!confirm("Remover este barbeiro?")) return
+    await fetch(`/api/barbers/${barber.id}`,{method:"DELETE"})
+    qc.invalidateQueries({queryKey:["team"]}); onClose()
+  }
 
-  const totalRev = barbers.reduce((s:number,b:any)=>s+b.rev,0)
-  const totalCom = barbers.reduce((s:number,b:any)=>s+(b.rev*b.commission/100),0)
-
-  return (
-    <div style={{padding:"24px",maxWidth:700,margin:"0 auto"}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <div style={{flex:1}}>
-          <div style={{fontSize:11,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:".06em"}}>Admin</div>
-          <div style={{fontSize:20,fontWeight:600,color:"var(--text)"}}>Equipe</div>
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
+      <div style={{background:"var(--color-background-primary)",borderRadius:14,width:"100%",maxWidth:480,maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px",borderBottom:"1px solid var(--color-border-tertiary)"}}>
+          <div style={{fontSize:15,fontWeight:600,color:"var(--color-text-primary)"}}>{isNew?"Novo membro":"Editar membro"}</div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",cursor:"pointer",color:"var(--color-text-tertiary)",display:"flex"}}><X size={18}/></button>
         </div>
-        {editing!=="new"&&(
-          <button onClick={()=>{setEditing("new");setForm({...EMPTY})}} style={{
-            display:"flex",alignItems:"center",gap:5,padding:"9px 16px",borderRadius:9,border:"none",
-            background:"var(--accent)",color:"var(--accent-fg)",fontSize:13,fontWeight:600,cursor:"pointer",
-          }}><Plus size={14}/>Novo barbeiro</button>
-        )}
+        <div style={{padding:20,display:"flex",flexDirection:"column",gap:12}}>
+          <div style={{textAlign:"center"}}>
+            <div style={{width:72,height:72,borderRadius:"50%",background:"var(--color-background-secondary)",margin:"0 auto 8px",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {avatar?<img src={avatar} alt="avatar" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<Camera size={24} color="var(--color-text-tertiary)"/>}
+            </div>
+            <input value={avatar} onChange={e=>setAvatar(e.target.value)} placeholder="URL da foto" style={{...inp,fontSize:12,textAlign:"center"}}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <div><label style={{fontSize:12,color:"var(--color-text-tertiary)",display:"block",marginBottom:4}}>Nome</label><input value={name} onChange={e=>setName(e.target.value)} style={inp}/></div>
+            <div><label style={{fontSize:12,color:"var(--color-text-tertiary)",display:"block",marginBottom:4}}>Função</label>
+              <select value={role} onChange={e=>setRole(e.target.value)} style={inp}>
+                <option value="BARBER">Barbeiro</option><option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div><label style={{fontSize:12,color:"var(--color-text-tertiary)",display:"block",marginBottom:4}}>E-mail</label><input value={email} onChange={e=>setEmail(e.target.value)} type="email" style={inp}/></div>
+          <div><label style={{fontSize:12,color:"var(--color-text-tertiary)",display:"block",marginBottom:4}}>{isNew?"Senha":"Nova senha (em branco = manter)"}</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password" style={inp}/></div>
+          <div>
+            <label style={{fontSize:12,color:"var(--color-text-tertiary)",display:"block",marginBottom:4}}>Comissão — {pct}%</label>
+            <input type="range" min="0" max="100" value={pct} onChange={e=>setPct(Number(e.target.value))} style={{width:"100%"}}/>
+          </div>
+          {!isNew&&barber&&(
+            <div>
+              <button onClick={()=>setShowGoals(v=>!v)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",borderRadius:9,border:"1px solid var(--color-border-secondary)",background:"var(--color-background-secondary)",cursor:"pointer",color:"var(--color-text-secondary)",fontSize:13,fontWeight:500}}>
+                <span style={{display:"flex",alignItems:"center",gap:6}}><Target size={14}/>Metas do barbeiro</span>
+                {showGoals?<ChevronUp size={14}/>:<ChevronDown size={14}/>}
+              </button>
+              {showGoals&&<GoalEditor barberId={barber.id} onClose={()=>setShowGoals(false)}/>}
+            </div>
+          )}
+        </div>
+        <div style={{padding:"0 20px 20px",display:"flex",gap:8}}>
+          {!isNew&&<button onClick={del} style={{padding:"11px 14px",borderRadius:9,border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center"}}><Trash2 size={14}/></button>}
+          <button onClick={save} disabled={saving} style={{flex:1,padding:"12px",borderRadius:9,border:"none",cursor:"pointer",background:"var(--accent,#111)",color:"var(--accent-fg,#fff)",fontSize:14,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+            {saving?"Salvando…":<><Check size={14}/>Salvar</>}
+          </button>
+        </div>
       </div>
+    </div>
+  )
+}
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20}}>
-        {[{label:"Barbeiros ativos",val:barbers.filter((b:any)=>b.active).length},
-          {label:"Faturado",val:BRL(totalRev)},
-          {label:"Comissões",val:BRL(totalCom)}].map(s=>(
-          <div key={s.label} style={{background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,padding:"12px 14px",boxShadow:"var(--shadow)"}}>
-            <div style={{fontSize:20,fontWeight:600,color:"var(--text)"}}>{s.val}</div>
-            <div style={{fontSize:10,color:"var(--text-4)",marginTop:2,textTransform:"uppercase",letterSpacing:".04em"}}>{s.label}</div>
+export default function TeamPanel(){
+  const [modal,setModal]=useState<Barber|null|"new">(null)
+  const {data,isLoading}=useQuery({
+    queryKey:["team"],
+    queryFn:()=>fetch("/api/barbers").then(r=>r.json()).then(d=>d.data??[]),
+  })
+  const members:Barber[]=data??[]
+  return(
+    <div style={{padding:"24px",maxWidth:860,margin:"0 auto"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+        <div><div style={{fontSize:11,color:"var(--color-text-tertiary)",textTransform:"uppercase",letterSpacing:".06em"}}>Admin</div><div style={{fontSize:20,fontWeight:600,color:"var(--color-text-primary)"}}>Equipe</div></div>
+        <button onClick={()=>setModal("new")} style={{display:"flex",alignItems:"center",gap:6,padding:"9px 16px",borderRadius:9,border:"none",cursor:"pointer",fontSize:13,fontWeight:600,background:"var(--accent,#111)",color:"var(--accent-fg,#fff)"}}><Plus size={15}/>Novo membro</button>
+      </div>
+      {isLoading&&<div style={{textAlign:"center",padding:40,color:"var(--color-text-tertiary)"}}>Carregando…</div>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
+        {members.map(m=>(
+          <div key={m.id} onClick={()=>setModal(m)} style={{background:"var(--color-background-primary)",border:"1px solid var(--color-border-tertiary)",borderRadius:14,padding:20,cursor:"pointer",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+              <div style={{width:52,height:52,borderRadius:"50%",background:"var(--color-background-secondary)",overflow:"hidden",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"var(--color-text-secondary)"}}>
+                {m.avatarUrl?<img src={m.avatarUrl} alt={m.name} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:m.name[0]}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:15,fontWeight:600,color:"var(--color-text-primary)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}</div>
+                <div style={{fontSize:12,color:"var(--color-text-tertiary)",marginTop:2}}>{m.role==="ADMIN"?"Admin":"Barbeiro"}</div>
+              </div>
+              <div style={{fontSize:10,padding:"3px 8px",borderRadius:10,background:m.active?"#d1fae5":"#fee2e2",color:m.active?"#065f46":"#991b1b",fontWeight:600,flexShrink:0}}>{m.active?"Ativo":"Inativo"}</div>
+            </div>
+            <div style={{background:"var(--color-background-secondary)",borderRadius:9,padding:"10px 12px",textAlign:"center"}}>
+              <div style={{fontSize:18,fontWeight:700,color:"var(--color-text-primary)"}}>{Number(m.commissionPct)}%</div>
+              <div style={{fontSize:10,color:"var(--color-text-tertiary)",textTransform:"uppercase",letterSpacing:".04em",marginTop:2}}>Comissão · toque para editar metas</div>
+            </div>
           </div>
         ))}
       </div>
-
-      <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        {editing==="new"&&(
-          <div style={{background:"var(--bg-card)",border:"2px solid var(--accent)",borderRadius:14,padding:20,boxShadow:"var(--shadow)"}}>
-            <BarberForm form={form} set={set} onSave={save} onCancel={cancel} canSave={canSave} title="Novo barbeiro"/>
-          </div>
-        )}
-
-        {barbers.map((b:any,i:number)=>{
-          const color  = PALETTE[i%PALETTE.length]
-          const isEdit = editing===b.id
-          const com    = b.rev*b.commission/100
-          const shop   = b.rev-com
-          return (
-            <div key={b.id} style={{
-              background:"var(--bg-card)",
-              border:isEdit?"2px solid var(--accent)":"1px solid var(--border)",
-              borderRadius:14,padding:16,opacity:b.active?1:.55,
-              boxShadow:"var(--shadow)",transition:"opacity .2s",
-            }}>
-              <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:isEdit?16:0}}>
-                {b.avatarUrl ? (
-                  <img src={b.avatarUrl} alt={b.name} style={{width:50,height:50,borderRadius:"50%",objectFit:"cover",flexShrink:0,border:"2px solid var(--border)"}}/>
-                ) : (
-                  <div style={{width:50,height:50,borderRadius:"50%",background:color+"1a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:600,color,flexShrink:0,border:"2px solid "+color+"30"}}>
-                    {b.name[0]}
-                  </div>
-                )}
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:15,fontWeight:600,display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",color:"var(--text)"}}>
-                    {b.name}
-                    {b.role==="ADMIN"&&<span style={{fontSize:10,background:color+"1a",color,padding:"2px 7px",borderRadius:5,fontWeight:600}}>Admin</span>}
-                    {!b.active&&<span style={{fontSize:10,background:"var(--bg-hover)",color:"var(--text-4)",padding:"2px 7px",borderRadius:5}}>Inativo</span>}
-                  </div>
-                  <div style={{fontSize:12,color:"var(--text-4)",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.email}</div>
-                </div>
-                <div style={{display:"flex",gap:6}}>
-                  <button onClick={()=>toggle(b.id)} style={{
-                    width:32,height:32,borderRadius:8,border:"1px solid var(--border)",
-                    background:b.active?"#d1fae5":"var(--bg-hover)",cursor:"pointer",
-                    display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,
-                    color:b.active?"#065f46":"var(--text-3)",fontWeight:600,
-                  }}>{b.active?"✓":"○"}</button>
-                  <button onClick={()=>isEdit?cancel():startEdit(b)} style={{
-                    width:32,height:32,borderRadius:8,border:"1px solid var(--border)",
-                    background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
-                  }}>
-                    {isEdit?<X size={14} color="var(--text-3)"/>:<Edit2 size={14} color="var(--text-4)"/>}
-                  </button>
-                </div>
-              </div>
-
-              {!isEdit&&(
-                <>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginTop:14,paddingTop:14,borderTop:"1px solid var(--border)"}}>
-                    {[{l:"Atendimentos",v:b.appts,a:undefined},{l:"Faturado",v:BRL(b.rev),a:undefined},{l:"A receber",v:BRL(com),a:"#10b981"}].map(m=>(
-                      <div key={m.l} style={{background:"var(--bg-hover)",borderRadius:8,padding:"9px 10px"}}>
-                        <div style={{fontSize:10,color:"var(--text-4)",textTransform:"uppercase",letterSpacing:".04em"}}>{m.l}</div>
-                        <div style={{fontSize:14,fontWeight:600,marginTop:2,color:m.a||"var(--text)"}}>{m.v}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{marginTop:10}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--text-4)",marginBottom:4}}>
-                      <span>Barbearia ({100-b.commission}%) — {BRL(shop)}</span>
-                      <span>Barbeiro ({b.commission}%) — {BRL(com)}</span>
-                    </div>
-                    <div style={{height:6,borderRadius:3,background:"var(--border)",overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${100-b.commission}%`,background:color,borderRadius:3,transition:"width .3s"}}/>
-                    </div>
-                  </div>
-                </>
-              )}
-              {isEdit&&<BarberForm form={form} set={set} onSave={save} onCancel={cancel} canSave={canSave} title="Editar barbeiro"/>}
-            </div>
-          )
-        })}
-      </div>
+      {modal&&<BarberModal barber={modal==="new"?null:modal} onClose={()=>setModal(null)}/>}
     </div>
   )
 }
