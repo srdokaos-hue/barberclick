@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Sidebar from "@/components/admin/Sidebar"
+import VendaRapidaFloat from "@/components/admin/VendaRapidaFloat"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
@@ -13,6 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <main style={{ flex:1, overflow:"auto", background:"var(--bg)", minWidth:0 }}>
         {children}
       </main>
+      <VendaRapidaFloat/>
     </div>
   )
 }

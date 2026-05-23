@@ -18,7 +18,7 @@ export default function VendaRapidaFloat() {
           boxShadow:"0 4px 20px rgba(99,102,241,.5)",
           display:"flex",alignItems:"center",justifyContent:"center",
           transform:hovered?"scale(1.1)":"scale(1)",
-          transition:"transform .15s, box-shadow .15s",
+          transition:"transform .15s",
         }}>
         <Zap size={22} color="white"/>
       </button>
