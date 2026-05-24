@@ -6,45 +6,33 @@ import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Calendar, Package, Users, Scissors,
   BarChart2, Settings, CreditCard, LogOut, Moon, Sun,
-  Menu, X, Lock
+  Menu, X, Lock, Crown
 } from "lucide-react"
 import { hasFeature } from "@/lib/features"
 
 const PLAN_LABEL: Record<string,string> = { STARTER:"Starter", PRO:"Pro", ELITE:"Elite" }
 const PLAN_COLOR: Record<string,string> = { STARTER:"#6b7280", PRO:"#3b82f6", ELITE:"#8b5cf6" }
 
-interface NavItem {
-  href:    string
-  label:   string
-  Icon:    any
-  feature?: string   // se definido, exige esse plano
-  plan?:  "STARTER"|"PRO"|"ELITE"
-}
-
-const NAV: NavItem[] = [
+const NAV = [
   { href:"/dashboard",     label:"Dashboard",    Icon:LayoutDashboard },
   { href:"/agendamentos",  label:"Agendamentos", Icon:Calendar        },
   { href:"/produtos",      label:"Estoque",      Icon:Package         },
   { href:"/clientes",      label:"Clientes",     Icon:Users           },
+  { href:"/clube",         label:"Clube",        Icon:Crown           },
   { href:"/equipe",        label:"Equipe",       Icon:Scissors        },
-  { href:"/relatorios",    label:"Relatórios",   Icon:BarChart2,  feature:"relatorios", plan:"PRO"   },
+  { href:"/relatorios",    label:"Relatórios",   Icon:BarChart2, feature:"relatorios", plan:"PRO" as const },
   { href:"/configuracoes", label:"Configurações",Icon:Settings        },
   { href:"/assinatura",    label:"Assinatura",   Icon:CreditCard      },
 ]
 
-// Modal de feature bloqueada
 function LockedModal({ feature, plan, onClose }: { feature:string; plan:string; onClose:()=>void }) {
+  const color = PLAN_COLOR[plan] ?? "#3b82f6"
   const DESCS: Record<string,string> = {
     relatorios: "DRE completo, gráficos de performance e relatório por barbeiro.",
-    lembretes:  "Mensagens automáticas para clientes que não retornam.",
-    order_bump: "Ofereça produtos com desconto durante o agendamento.",
   }
   const LABELS: Record<string,string> = {
     relatorios: "Relatórios avançados",
-    lembretes:  "Lembretes WhatsApp",
-    order_bump: "Order Bump",
   }
-  const color = PLAN_COLOR[plan] ?? "#3b82f6"
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={onClose}>
       <div style={{background:"#1e293b",borderRadius:18,width:"100%",maxWidth:380,padding:28,border:"1px solid #334155",boxShadow:"0 20px 60px rgba(0,0,0,.5)"}} onClick={e=>e.stopPropagation()}>
@@ -53,20 +41,18 @@ function LockedModal({ feature, plan, onClose }: { feature:string; plan:string; 
         </div>
         <div style={{textAlign:"center",marginBottom:20}}>
           <div style={{fontSize:17,fontWeight:700,color:"white",marginBottom:8}}>{LABELS[feature]||feature}</div>
-          <div style={{fontSize:13,color:"rgba(255,255,255,.55)",lineHeight:1.6}}>{DESCS[feature]||"Recurso disponível em planos superiores."}</div>
+          <div style={{fontSize:13,color:"rgba(255,255,255,.55)",lineHeight:1.6}}>{DESCS[feature]||"Disponível em planos superiores."}</div>
         </div>
         <div style={{background:"rgba(255,255,255,.06)",borderRadius:10,padding:"12px 14px",marginBottom:20,textAlign:"center"}}>
           <div style={{fontSize:12,color:"rgba(255,255,255,.4)",marginBottom:4}}>Disponível no plano</div>
           <div style={{fontSize:18,fontWeight:700,color}}>{PLAN_LABEL[plan]} e superior</div>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <a href="https://wa.me/5511999999999?text=Quero+fazer+upgrade+do+BarberaSystem" target="_blank"
+          <a href="https://wa.me/5511999999999?text=Quero+upgrade+BarberaSystem" target="_blank"
             style={{display:"block",padding:"12px",borderRadius:10,background:color,color:"white",textAlign:"center",textDecoration:"none",fontSize:14,fontWeight:700}}>
             💬 Falar com suporte para upgrade
           </a>
-          <button onClick={onClose} style={{padding:"11px",borderRadius:10,border:"1px solid #334155",background:"transparent",color:"rgba(255,255,255,.5)",fontSize:13,cursor:"pointer"}}>
-            Fechar
-          </button>
+          <button onClick={onClose} style={{padding:"11px",borderRadius:10,border:"1px solid #334155",background:"transparent",color:"rgba(255,255,255,.5)",fontSize:13,cursor:"pointer"}}>Fechar</button>
         </div>
       </div>
     </div>
@@ -76,11 +62,11 @@ function LockedModal({ feature, plan, onClose }: { feature:string; plan:string; 
 export default function Sidebar() {
   const path = usePathname()
   const { data: session } = useSession()
-  const [dark,      setDark]      = useState(false)
-  const [open,      setOpen]      = useState(false)
-  const [mobile,    setMobile]    = useState(false)
-  const [shopName,  setShopName]  = useState("BarberaSystem")
-  const [logoUrl,   setLogoUrl]   = useState("")
+  const [dark,        setDark]        = useState(false)
+  const [open,        setOpen]        = useState(false)
+  const [mobile,      setMobile]      = useState(false)
+  const [shopName,    setShopName]    = useState("BarberaSystem")
+  const [logoUrl,     setLogoUrl]     = useState("")
   const [lockedModal, setLockedModal] = useState<{feature:string;plan:string}|null>(null)
 
   const userPlan = (session?.user as any)?.plan ?? "STARTER"
@@ -93,13 +79,13 @@ export default function Sidebar() {
 
   useEffect(() => {
     const saved = localStorage.getItem("theme")
-    const isDark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    const isDark = saved==="dark"||(!saved&&window.matchMedia("(prefers-color-scheme: dark)").matches)
     setDark(isDark)
-    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light")
+    document.documentElement.setAttribute("data-theme", isDark?"dark":"light")
     const ac = localStorage.getItem("accentColor")
-    if (ac) {
-      document.documentElement.style.setProperty("--accent", ac)
-      document.documentElement.style.setProperty("--sidebar-bg", ac)
+    if(ac){
+      document.documentElement.style.setProperty("--accent",ac)
+      document.documentElement.style.setProperty("--sidebar-bg",ac)
       const r=parseInt(ac.slice(1,3),16),g=parseInt(ac.slice(3,5),16),b=parseInt(ac.slice(5,7),16)
       const lum=(0.299*r+0.587*g+0.114*b)/255
       const fg=lum>0.5?"#111827":"#ffffff"
@@ -107,64 +93,53 @@ export default function Sidebar() {
       document.documentElement.style.setProperty("--sidebar-fg",fg)
       document.documentElement.style.setProperty("--sidebar-muted",lum>0.5?"rgba(17,24,39,.5)":"rgba(255,255,255,.55)")
     }
-    const n = localStorage.getItem("shopName"); if(n) setShopName(n)
-    const h = () => { const n2=localStorage.getItem("shopName"); if(n2) setShopName(n2) }
-    window.addEventListener("settingsUpdated", h)
-    return () => window.removeEventListener("settingsUpdated", h)
-  }, [])
+    const n=localStorage.getItem("shopName"); if(n) setShopName(n)
+    const h=()=>{const n2=localStorage.getItem("shopName");if(n2)setShopName(n2)}
+    window.addEventListener("settingsUpdated",h)
+    return()=>window.removeEventListener("settingsUpdated",h)
+  },[])
 
-  useEffect(() => {
+  useEffect(()=>{
     fetch("/api/settings").then(r=>r.ok?r.json():null).then(d=>{
       if(d?.data?.barbershop?.logoUrl) setLogoUrl(d.data.barbershop.logoUrl)
       if(d?.data?.barbershop?.name)    setShopName(d.data.barbershop.name)
     }).catch(()=>{})
-  }, [])
+  },[])
 
-  useEffect(() => { setOpen(false) }, [path])
+  useEffect(()=>{setOpen(false)},[path])
 
-  const toggleDark = () => {
-    const next = !dark; setDark(next)
-    document.documentElement.setAttribute("data-theme", next?"dark":"light")
-    localStorage.setItem("theme", next?"dark":"light")
+  const toggleDark=()=>{
+    const next=!dark; setDark(next)
+    document.documentElement.setAttribute("data-theme",next?"dark":"light")
+    localStorage.setItem("theme",next?"dark":"light")
   }
 
   const logoEl = logoUrl
-    ? <img src={logoUrl} alt={shopName} style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
-    : <div style={{width:32,height:32,background:"rgba(255,255,255,.15)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Scissors size={17} color="var(--sidebar-fg)"/></div>
+    ?<img src={logoUrl} alt={shopName} style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
+    :<div style={{width:32,height:32,background:"rgba(255,255,255,.15)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Scissors size={17} color="var(--sidebar-fg)"/></div>
 
-  const renderNav = () => NAV.map(({ href, label, Icon, feature, plan }) => {
-    const active  = path === href || (href !== "/dashboard" && path.startsWith(href))
-    const locked  = !!feature && !!plan && !hasFeature(userPlan, plan)
-
-    if (locked) {
-      return (
-        <button key={href} onClick={()=>setLockedModal({feature:feature!,plan:plan!})}
-          style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,border:"none",width:"100%",textAlign:"left",background:"transparent",color:"var(--sidebar-muted)",fontSize:14,fontWeight:400,cursor:"pointer",opacity:.6}}>
-          <Icon size={17}/>
-          <span style={{flex:1}}>{label}</span>
-          <Lock size={12} style={{flexShrink:0,opacity:.7}}/>
-        </button>
-      )
-    }
-
-    return (
+  const renderNav=()=>NAV.map(({href,label,Icon,feature,plan})=>{
+    const active=path===href||(href!=="/dashboard"&&path.startsWith(href))
+    const locked=!!feature&&!!plan&&!hasFeature(userPlan,plan)
+    if(locked) return(
+      <button key={href} onClick={()=>setLockedModal({feature:feature!,plan:plan!})}
+        style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,border:"none",width:"100%",textAlign:"left",background:"transparent",color:"var(--sidebar-muted)",fontSize:14,cursor:"pointer",opacity:.6}}>
+        <Icon size={17}/><span style={{flex:1}}>{label}</span><Lock size={12}/>
+      </button>
+    )
+    return(
       <Link key={href} href={href} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:8,textDecoration:"none",background:active?"rgba(255,255,255,.15)":"transparent",color:active?"var(--sidebar-fg)":"var(--sidebar-muted)",fontSize:14,fontWeight:active?500:400}}>
         <Icon size={17}/>{label}
-        {active && <div style={{marginLeft:"auto",width:4,height:4,borderRadius:"50%",background:"var(--sidebar-fg)"}}/>}
+        {active&&<div style={{marginLeft:"auto",width:4,height:4,borderRadius:"50%",background:"var(--sidebar-fg)"}}/>}
       </Link>
     )
   })
 
-  const bottomSection = (
+  const bottom=(
     <div style={{padding:"0 10px 16px"}}>
-      {/* Badge do plano */}
       <div style={{padding:"8px 12px",marginBottom:4}}>
-        <div style={{fontSize:10,color:"var(--sidebar-muted)",textTransform:"uppercase",letterSpacing:".06em"}}>
-          Plano atual
-        </div>
-        <div style={{fontSize:13,fontWeight:600,color:PLAN_COLOR[userPlan]||"var(--sidebar-fg)",marginTop:2}}>
-          {PLAN_LABEL[userPlan]||userPlan}
-        </div>
+        <div style={{fontSize:10,color:"var(--sidebar-muted)",textTransform:"uppercase",letterSpacing:".06em"}}>Plano atual</div>
+        <div style={{fontSize:13,fontWeight:600,color:PLAN_COLOR[userPlan]||"var(--sidebar-fg)",marginTop:2}}>{PLAN_LABEL[userPlan]||userPlan}</div>
       </div>
       <button onClick={toggleDark} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",borderRadius:8,border:"none",background:"transparent",color:"var(--sidebar-muted)",fontSize:13,cursor:"pointer",marginBottom:4}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>{dark?<Sun size={15}/>:<Moon size={15}/>}{dark?"Modo claro":"Modo escuro"}</div>
@@ -184,25 +159,22 @@ export default function Sidebar() {
     </div>
   )
 
-  const sidebarContent = (
+  const inner=(close?:boolean)=>(
     <div style={{display:"flex",flexDirection:"column",height:"100%",background:"var(--sidebar-bg)",color:"var(--sidebar-fg)"}}>
       <div style={{padding:"18px 20px 16px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid rgba(255,255,255,.1)"}}>
         {logoEl}
         <span style={{fontSize:14,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--sidebar-fg)"}}>{shopName}</span>
-        {mobile && <button onClick={()=>setOpen(false)} style={{background:"transparent",border:"none",color:"var(--sidebar-muted)",cursor:"pointer",padding:4,display:"flex"}}><X size={20}/></button>}
+        {close&&<button onClick={()=>setOpen(false)} style={{background:"transparent",border:"none",color:"var(--sidebar-muted)",cursor:"pointer",padding:4,display:"flex"}}><X size={20}/></button>}
       </div>
-      <nav style={{flex:1,display:"flex",flexDirection:"column",gap:2,padding:"12px 10px",overflowY:"auto"}}>
-        {renderNav()}
-      </nav>
-      {bottomSection}
+      <nav style={{flex:1,display:"flex",flexDirection:"column",gap:2,padding:"12px 10px",overflowY:"auto"}}>{renderNav()}</nav>
+      {bottom}
     </div>
   )
 
-  return (
+  return(
     <>
-      {lockedModal && <LockedModal feature={lockedModal.feature} plan={lockedModal.plan} onClose={()=>setLockedModal(null)}/>}
-
-      {mobile ? (
+      {lockedModal&&<LockedModal feature={lockedModal.feature} plan={lockedModal.plan} onClose={()=>setLockedModal(null)}/>}
+      {mobile?(
         <>
           <div style={{position:"fixed",top:0,left:0,right:0,height:56,zIndex:100,background:"var(--sidebar-bg)",borderBottom:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",padding:"0 16px",gap:12}}>
             <button onClick={()=>setOpen(true)} style={{background:"transparent",border:"none",color:"var(--sidebar-fg)",cursor:"pointer",padding:4,display:"flex"}}><Menu size={22}/></button>
@@ -210,16 +182,12 @@ export default function Sidebar() {
             <span style={{fontSize:15,fontWeight:600,color:"var(--sidebar-fg)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{shopName}</span>
             <span style={{fontSize:12,color:"var(--sidebar-muted)"}}>{NAV.find(n=>path===n.href||path.startsWith(n.href+"/"))?.label}</span>
           </div>
-          {open && <div onClick={()=>setOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:200}}/>}
-          <div style={{position:"fixed",top:0,left:0,bottom:0,width:260,zIndex:300,transform:open?"translateX(0)":"translateX(-100%)",transition:"transform .25s ease"}}>
-            {sidebarContent}
-          </div>
+          {open&&<div onClick={()=>setOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:200}}/>}
+          <div style={{position:"fixed",top:0,left:0,bottom:0,width:260,zIndex:300,transform:open?"translateX(0)":"translateX(-100%)",transition:"transform .25s ease"}}>{inner(true)}</div>
           <div style={{height:56}}/>
         </>
-      ) : (
-        <aside style={{width:220,minHeight:"100vh",flexShrink:0}}>
-          {sidebarContent}
-        </aside>
+      ):(
+        <aside style={{width:220,minHeight:"100vh",flexShrink:0}}>{inner()}</aside>
       )}
     </>
   )
