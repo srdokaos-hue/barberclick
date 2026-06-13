@@ -153,9 +153,9 @@ export default function TeamPanel(){
               </div>
               <div style={{fontSize:10,padding:"3px 8px",borderRadius:10,background:m.active?"#d1fae5":"#fee2e2",color:m.active?"#065f46":"#991b1b",fontWeight:600,flexShrink:0}}>{m.active?"Ativo":"Inativo"}</div>
             </div>
-            <div style={{background:"var(--color-background-secondary)",borderRadius:9,padding:"10px 12px",textAlign:"center"}}>
-              <div style={{fontSize:18,fontWeight:700,color:"var(--color-text-primary)"}}>{Number(m.commissionPct)}%</div>
-              <div style={{fontSize:10,color:"var(--color-text-tertiary)",textTransform:"uppercase",letterSpacing:".04em",marginTop:2}}>Comissão · toque para editar metas</div>
+            <div style={{background:"var(--color-background-secondary)",borderRadius:9,padding:"10px 12px",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6,color:"var(--color-text-tertiary)"}}>
+              <Target size={13}/>
+              <div style={{fontSize:11,textTransform:"uppercase",letterSpacing:".04em"}}>Toque para editar metas</div>
             </div>
           </div>
         ))}

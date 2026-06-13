@@ -34,10 +34,11 @@ interface Product{id:string;name:string;salePrice:number;costPrice:number;stockQ
 
 function Modal({prod,onClose,onSave}:{prod:Product|null;onClose:()=>void;onSave:(d:any)=>void}){
   const [name,setName]  = useState(prod?.name??"")
-  const [sale,setSale]  = useState(prod?.salePrice??0)
-  const [cost,setCost]  = useState(prod?.costPrice??0)
-  const [qty, setQty]   = useState(prod?.stockQty??0)
-  const [low, setLow]   = useState(prod?.lowStockThreshold??3)
+  const [sale,setSale]  = useState(prod?.salePrice!=null?String(prod.salePrice):"")
+  const [cost,setCost]  = useState(prod?.costPrice!=null?String(prod.costPrice):"")
+  const [qty, setQty]   = useState(prod?.stockQty!=null?String(prod.stockQty):"")
+  const [low, setLow]   = useState(prod?.lowStockThreshold!=null?String(prod.lowStockThreshold):"3")
+  const saleN=Number(sale)||0, costN=Number(cost)||0, qtyN=Number(qty)||0, lowN=Number(low)||0
   return (
     <div style={S.overlay} onClick={onClose}>
       <div style={S.modal} onClick={e=>e.stopPropagation()}>
@@ -48,20 +49,20 @@ function Modal({prod,onClose,onSave}:{prod:Product|null;onClose:()=>void;onSave:
         <div style={S.mbody}>
           <div><label style={S.label}>Nome</label><input style={S.input} value={name} onChange={e=>setName(e.target.value)} placeholder="Ex: Pomada Matte"/></div>
           <div style={S.grid2}>
-            <div><label style={S.label}>Preço de venda (R$)</label><input style={S.input} type="number" value={sale} onChange={e=>setSale(Number(e.target.value))}/></div>
-            <div><label style={S.label}>Custo (R$)</label><input style={S.input} type="number" value={cost} onChange={e=>setCost(Number(e.target.value))}/></div>
+            <div><label style={S.label}>Preço de venda (R$)</label><input style={S.input} type="number" value={sale} onChange={e=>setSale(e.target.value)}/></div>
+            <div><label style={S.label}>Custo (R$)</label><input style={S.input} type="number" value={cost} onChange={e=>setCost(e.target.value)}/></div>
           </div>
           <div style={S.grid2}>
-            <div><label style={S.label}>Estoque atual</label><input style={S.input} type="number" value={qty} onChange={e=>setQty(Number(e.target.value))}/></div>
-            <div><label style={S.label}>Alerta abaixo de</label><input style={S.input} type="number" value={low} onChange={e=>setLow(Number(e.target.value))}/></div>
+            <div><label style={S.label}>Estoque atual</label><input style={S.input} type="number" value={qty} onChange={e=>setQty(e.target.value)}/></div>
+            <div><label style={S.label}>Alerta abaixo de</label><input style={S.input} type="number" value={low} onChange={e=>setLow(e.target.value)}/></div>
           </div>
-          {sale>0&&cost>0&&<div style={{fontSize:13,color:"var(--color-text-secondary)",background:"var(--color-background-secondary)",borderRadius:8,padding:"9px 12px"}}>
-            Margem: <strong>{margin(sale,cost)}%</strong> · Lucro por unidade: <strong>{BRL(sale-cost)}</strong>
+          {saleN>0&&costN>0&&<div style={{fontSize:13,color:"var(--color-text-secondary)",background:"var(--color-background-secondary)",borderRadius:8,padding:"9px 12px"}}>
+            Margem: <strong>{margin(saleN,costN)}%</strong> · Lucro por unidade: <strong>{BRL(saleN-costN)}</strong>
           </div>}
         </div>
         <div style={S.foot}>
           {prod&&<button onClick={()=>onSave({id:prod.id,delete:true})} style={S.delbtn}><Trash2 size={14}/></button>}
-          <button onClick={()=>onSave({id:prod?.id,name,salePrice:sale,costPrice:cost,stockQty:qty,lowStockThreshold:low})} style={S.savebtn}>
+          <button onClick={()=>onSave({id:prod?.id,name,salePrice:saleN,costPrice:costN,stockQty:qtyN,lowStockThreshold:lowN})} style={S.savebtn}>
             <Check size={14} style={{display:"inline",marginRight:4}}/>Salvar
           </button>
         </div>

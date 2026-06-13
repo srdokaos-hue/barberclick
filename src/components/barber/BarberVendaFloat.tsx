@@ -17,8 +17,8 @@ export default function BarberVendaFloat({ barberId }: { barberId: string }) {
         style={{
           position:"fixed", bottom:24, right:24, zIndex:100,
           width:56, height:56, borderRadius:"50%", border:"none", cursor:"pointer",
-          background:"linear-gradient(135deg,#6366f1,#8b5cf6)",
-          boxShadow:"0 4px 20px rgba(99,102,241,.5)",
+          background:"var(--accent)",
+          boxShadow:"0 4px 20px rgba(0,0,0,0.3)",
           display:"flex", alignItems:"center", justifyContent:"center",
           transform:hovered?"scale(1.1)":"scale(1)",
           transition:"transform .15s",

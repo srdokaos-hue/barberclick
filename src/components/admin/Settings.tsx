@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Check, Bell, Calendar, Package, Scissors, CreditCard, Plus, Trash2, Copy, Link, ExternalLink, RotateCcw } from "lucide-react"
+import { Check, Bell, Calendar, Package, Scissors, Copy, Link, ExternalLink, RotateCcw } from "lucide-react"
 
 const DOMAIN = "barberasystem.com"
 const DEFAULT_COLOR = "#111827"
@@ -27,7 +27,6 @@ const TABS = [
   {id:"agenda",   label:"Agenda",   Icon:Calendar},
   {id:"bump",     label:"Order Bump",Icon:Package},
   {id:"lembretes",label:"Lembretes",Icon:Bell},
-  {id:"planos",   label:"Planos",   Icon:CreditCard},
 ]
 
 function applyAccent(color: string) {
@@ -39,6 +38,7 @@ function applyAccent(color: string) {
   document.documentElement.style.setProperty("--accent-fg", fg)
   document.documentElement.style.setProperty("--sidebar-fg", fg)
   document.documentElement.style.setProperty("--sidebar-muted", lum>0.5?"rgba(17,24,39,.5)":"rgba(255,255,255,.55)")
+  document.documentElement.style.setProperty("--color-border-primary", color)
   localStorage.setItem("accentColor", color)
 }
 
@@ -66,11 +66,6 @@ export default function Settings() {
   const [remOn,     setRemOn]     = useState(true)
   const [remDays,   setRemDays]   = useState(25)
   const [remMsg,    setRemMsg]    = useState("Olá, {nome}! 👋 Faz {dias} dias que você não vem. Que tal agendar? {link}")
-  const [planos,    setPlanos]    = useState([
-    {id:"p1",name:"Starter",price:"97", features:["1 barbeiro","Link de agendamento"]},
-    {id:"p2",name:"Pro",    price:"197",features:["Até 3 barbeiros","Lembretes WhatsApp","DRE completo"]},
-    {id:"p3",name:"Elite",  price:"297",features:["Ilimitado","Tudo do Pro","Relatórios avançados"]},
-  ])
 
   useEffect(()=>{
     fetch("/api/settings").then(r=>r.ok?r.json():null).then(d=>{
@@ -275,34 +270,6 @@ export default function Settings() {
         </SCard>
       )}
 
-      {tab==="planos"&&(
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          {planos.map((p,i)=>(
-            <SCard key={p.id}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:10,alignItems:"end"}}>
-                <Field label="Nome"><input value={p.name} onChange={e=>setPlanos(pp=>pp.map((x,j)=>j===i?{...x,name:e.target.value}:x))} style={inp}/></Field>
-                <Field label="R$/mês"><input type="number" value={p.price} onChange={e=>setPlanos(pp=>pp.map((x,j)=>j===i?{...x,price:e.target.value}:x))} style={{...inp,width:100}}/></Field>
-              </div>
-              <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                {p.features.map((f,fi)=>(
-                  <div key={fi} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--color-text-secondary)"}}>
-                    <Check size={12} color="#10b981"/><span style={{flex:1}}>{f}</span>
-                    <button onClick={()=>setPlanos(pp=>pp.map((x,j)=>j===i?{...x,features:x.features.filter((_,fj)=>fj!==fi)}:x))} style={{background:"transparent",border:"none",color:"var(--color-text-tertiary)",cursor:"pointer"}}>×</button>
-                  </div>
-                ))}
-              </div>
-              <div style={{display:"flex",gap:6}}>
-                <input placeholder="+ Adicionar funcionalidade" style={{...inp,flex:1,fontSize:12}} onKeyDown={e=>{if(e.key==="Enter"){const v=(e.target as HTMLInputElement).value.trim();if(v){setPlanos(pp=>pp.map((x,j)=>j===i?{...x,features:[...x.features,v]}:x));(e.target as HTMLInputElement).value=""}}}}/>
-                <button onClick={()=>setPlanos(pp=>pp.filter((_,j)=>j!==i))} style={{padding:"9px 12px",borderRadius:8,border:"1px solid #fca5a5",background:"#fef2f2",color:"#dc2626",cursor:"pointer",display:"flex"}}><Trash2 size={14}/></button>
-              </div>
-            </SCard>
-          ))}
-          <button onClick={()=>setPlanos(p=>[...p,{id:"p"+Date.now(),name:"Novo Plano",price:"0",features:[]}])} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"12px",borderRadius:10,border:"2px dashed var(--color-border-secondary)",background:"transparent",color:"var(--color-text-tertiary)",fontSize:13,cursor:"pointer"}}>
-            <Plus size={14}/>Adicionar plano
-          </button>
-          <SaveBtn s="planos"/>
-        </div>
-      )}
     </div>
   )
 }

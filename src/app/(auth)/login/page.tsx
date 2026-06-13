@@ -3,6 +3,22 @@ import { signIn, getSession } from "next-auth/react"
 import { useState } from "react"
 import { Scissors } from "lucide-react"
 
+// Pattern sutil de barbearia (tesoura + pente) — tile 120x120, opacidade baixa
+const BARBER_PATTERN = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'>
+  <g fill='none' stroke='#e5e7eb' stroke-width='2' stroke-linecap='round' opacity='0.06'>
+    <circle cx='20' cy='30' r='6'/>
+    <circle cx='20' cy='46' r='6'/>
+    <line x1='25' y1='33' x2='54' y2='52'/>
+    <line x1='25' y1='43' x2='54' y2='24'/>
+    <rect x='68' y='80' width='42' height='11' rx='2'/>
+    <line x1='73' y1='91' x2='73' y2='103'/>
+    <line x1='80' y1='91' x2='80' y2='103'/>
+    <line x1='87' y1='91' x2='87' y2='103'/>
+    <line x1='94' y1='91' x2='94' y2='103'/>
+    <line x1='101' y1='91' x2='101' y2='103'/>
+  </g>
+</svg>`)
+
 export default function LoginPage() {
   const [email,    setEmail]    = useState("")
   const [password, setPassword] = useState("")
@@ -20,7 +36,7 @@ export default function LoginPage() {
   }
 
   return(
-    <div style={{minHeight:"100vh",width:"100%",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <div style={{minHeight:"100vh",width:"100%",background:"#0f172a",backgroundImage:`url("data:image/svg+xml,${BARBER_PATTERN}")`,backgroundSize:"120px 120px",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{width:"100%",maxWidth:360}}>
         <div style={{textAlign:"center",marginBottom:32}}>
           <div style={{width:60,height:60,background:"white",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>

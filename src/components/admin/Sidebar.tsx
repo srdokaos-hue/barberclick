@@ -176,7 +176,7 @@ export default function Sidebar() {
       {lockedModal&&<LockedModal feature={lockedModal.feature} plan={lockedModal.plan} onClose={()=>setLockedModal(null)}/>}
       {mobile?(
         <>
-          <div style={{position:"fixed",top:0,left:0,right:0,height:56,zIndex:100,background:"var(--sidebar-bg)",borderBottom:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",padding:"0 16px",gap:12}}>
+          <div style={{position:"fixed",top:0,left:0,right:0,height:"calc(56px + env(safe-area-inset-top))",zIndex:100,background:"var(--sidebar-bg)",borderBottom:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",gap:12}}>
             <button onClick={()=>setOpen(true)} style={{background:"transparent",border:"none",color:"var(--sidebar-fg)",cursor:"pointer",padding:4,display:"flex"}}><Menu size={22}/></button>
             {logoEl}
             <span style={{fontSize:15,fontWeight:600,color:"var(--sidebar-fg)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{shopName}</span>
@@ -184,7 +184,7 @@ export default function Sidebar() {
           </div>
           {open&&<div onClick={()=>setOpen(false)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",zIndex:200}}/>}
           <div style={{position:"fixed",top:0,left:0,bottom:0,width:260,zIndex:300,transform:open?"translateX(0)":"translateX(-100%)",transition:"transform .25s ease"}}>{inner(true)}</div>
-          <div style={{height:56}}/>
+          <div style={{height:"calc(56px + env(safe-area-inset-top))"}}/>
         </>
       ):(
         <aside style={{width:220,minHeight:"100vh",flexShrink:0}}>{inner()}</aside>

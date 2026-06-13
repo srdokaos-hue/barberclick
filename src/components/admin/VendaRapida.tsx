@@ -72,7 +72,7 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
 
         {/* Header */}
         <div style={{padding:"18px 20px",borderBottom:"1px solid #334155",display:"flex",alignItems:"center",gap:10,background:"#0f172a"}}>
-          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <div style={{width:36,height:36,borderRadius:10,background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <Zap size={18} color="white"/>
           </div>
           <div style={{flex:1}}>
@@ -120,7 +120,6 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
                     color:barberId===b.id?"#111":"white",
                   }}>
                     <div style={{fontSize:13,fontWeight:600}}>{b.name}</div>
-                    <div style={{fontSize:11,opacity:.6,marginTop:2}}>{Number(b.commissionPct)}% comissão</div>
                   </div>
                 ))}
               </div>
@@ -135,8 +134,8 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
                 {services.map((s:any)=>{
                   const sel=selSvcs.includes(s.id)
                   return(
-                    <div key={s.id} onClick={()=>toggleSvc(s.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderRadius:9,cursor:"pointer",background:sel?"rgba(99,102,241,.2)":"rgba(255,255,255,.04)",border:sel?"1px solid #6366f1":"1px solid #334155"}}>
-                      <div style={{width:18,height:18,borderRadius:5,border:sel?"none":"1px solid #475569",background:sel?"#6366f1":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <div key={s.id} onClick={()=>toggleSvc(s.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",borderRadius:9,cursor:"pointer",background:sel?"rgba(0,0,0,.15)":"rgba(255,255,255,.04)",border:sel?"1px solid var(--accent)":"1px solid #334155"}}>
+                      <div style={{width:18,height:18,borderRadius:5,border:sel?"none":"1px solid #475569",background:sel?"var(--accent)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                         {sel&&<Check size={11} color="white"/>}
                       </div>
                       <span style={{flex:1,fontSize:13,color:"white"}}>{s.name}</span>
@@ -197,7 +196,7 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
                 </div>
               </div>
             )}
-            <button onClick={submit} disabled={loading} style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"white",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <button onClick={submit} disabled={loading} style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:"pointer",background:"var(--accent)",color:"var(--accent-fg)",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
               {loading?"Registrando…":<><Zap size={15}/>Confirmar venda · {BRL(total)}</>}
             </button>
           </div>
