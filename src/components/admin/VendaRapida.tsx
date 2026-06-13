@@ -28,11 +28,9 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
   const services = servicesQ.data ?? []
   const products = productsQ.data ?? []
 
-  const selectedBarber = barbers.find((b:any)=>b.id===barberId)
   const totalSvcs  = services.filter((s:any)=>selSvcs.includes(s.id)).reduce((t:number,s:any)=>t+Number(s.price),0)
   const totalProds = products.filter((p:any)=>selProds.includes(p.id)).reduce((t:number,p:any)=>t+Number(p.salePrice),0)
   const total = totalSvcs+totalProds
-  const commission = total*(Number(selectedBarber?.commissionPct??0)/100)
 
   const toggleSvc=(id:string)=>setSelSvcs(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id])
   const toggleProd=(id:string)=>setSelProds(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id])
@@ -192,7 +190,6 @@ export default function VendaRapida({ onClose, defaultBarberId }: VRProps) {
                 <span>Total</span>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontSize:18,fontWeight:700,color:"white"}}>{BRL(total)}</div>
-                  {commission>0&&<div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>Comissão {selectedBarber?.name}: {BRL(commission)}</div>}
                 </div>
               </div>
             )}
